@@ -1,11 +1,17 @@
-name: build-test-deploy
-# Changed 'on' to enable this workflow to be called from other workflows
+name: Homelab deploy github action
 on:
   workflow_call:
-    # Introduced 'inputs' to define parameters that can be passed when calling this workflow
     inputs:
-      node-version:
-        description: "Node version"
+      ssh-host:
+        description: "SSH HOST"
+        required: true
+        type: string
+      ssh-private-key:
+        description: "SSH PRIVATE KEY"
+        required: true
+        type: string
+      ssh-user:
+        description: "SSH USER"
         required: true
         type: string
 
@@ -14,30 +20,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps: 
-      - name: checkout repo
-        uses: actions/checkout@v3
-      # Modified to use the node-version from the workflow inputs
-      - name: use node.js
-        uses: actions/setup-node@v3
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
         with:
-          node-version: ${{ inputs.node-version }}
-
-      - run: npm install
-      - run: npm run build
-
-  test: 
-    needs: build
-
-    runs-on: ubuntu-latest
-
-    steps: 
-      - name: checkout repo
-        uses: actions/checkout@v3
-      # Modified to use the node-version from the workflow inputs
-      - name: use node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ inputs.node-version }}
+          key: ${{ inputs.ssh-private-key }} 
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
           
-      - run: npm install
-      - run: npm run test
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ inputs.ssh-host }} >> ~/.ssh/known_hosts
+
+      - name: Debug SSH
+        run: |
+          ssh -vvv sofien@${{ inputs.ssh-host }} ls -la
