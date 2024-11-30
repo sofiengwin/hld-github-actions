@@ -36,4 +36,4 @@ jobs:
 
       - name: Debug SSH
         run: |
-          ssh -vvv sofien@${{  secrets.SSH_HOST }} ~/helm-releases/kube_demo.sh ${{ inputs.service-name }}
+          ssh -vvv sofien@${{  secrets.SSH_HOST }} ~/helm-releases/kube_deploy.sh ${{ inputs.service-name }}
